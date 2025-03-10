@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, SlashCommandBuilder, CommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events } from 'discord.js';
+import { Client, GatewayIntentBits, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, Events } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import 'dotenv/config';
@@ -10,7 +10,10 @@ const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const TOKEN: string = process.env.DISCORD_TOKEN!;
 const CLIENT_ID: string = process.env.CLIENT_ID!;
 const GUILD_ID: string = process.env.GUILD_ID!;
-let customids: string[] = []
+let customIds: string[] = []
+let deviceCustomIds: string[] = [];
+let deviceButtons: ButtonBuilder[] = [];
+let buttonMap: Record<string, number>;
 // スラッシュコマンドの登録
 const commands = [
     new SlashCommandBuilder()
@@ -48,26 +51,38 @@ client.on(Events.InteractionCreate, async (interaction) => {
         const row3 = new ActionRowBuilder<ButtonBuilder>().addComponents(buttons3);
         const row4 = new ActionRowBuilder<ButtonBuilder>().addComponents(buttons4);
         await interaction.reply({ content: 'ターミナル1', components: [row1, row2, row3, row4] });
-        customids = [...customIds1, ...customIds2, ...customIds3, ...customIds4]
+        customIds = [...customIds1, ...customIds2, ...customIds3, ...customIds4]
     }
     if(interaction.commandName === "device"){
         const deviceRoute = [
             [-1, -1, -1, -1, -1],
             [-1, 1, 2, 3, -1],
             [-1, 1, -1, 1, -1],
-            [1, 1, -1, 1, 1],
+            [1, 1, -1, 3, 1],
             [-2, -1, -1, -1, -3]
         ]
-        const [ buttons1, customIds1 ] = generateDevice(deviceRoute[0]);
-        const [ buttons2, customIds2 ] = generateDevice(deviceRoute[1]);
-        const [ buttons3, customIds3 ] = generateDevice(deviceRoute[3]);
-        const [ buttons4, customIds4 ] = generateDevice(deviceRoute[4]);
-        const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(buttons1);
-        const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(buttons2);
-        const row3 = new ActionRowBuilder<ButtonBuilder>().addComponents(buttons3);
-        const row4 = new ActionRowBuilder<ButtonBuilder>().addComponents(buttons4);
-        await interaction.reply({ content: 'ターミナル1', components: [row1, row2, row3, row4] });
-        customids = [...customIds1, ...customIds2, ...customIds3, ...customIds4]
+        const components: ActionRowBuilder<ButtonBuilder>[]= []
+        for(const route of deviceRoute){
+            const [ buttons, customId ] = generateDevice(route);
+            const row: ActionRowBuilder<ButtonBuilder>= new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
+            components.push(row)
+            deviceCustomIds.push(...customId)
+            deviceButtons.push(...buttons)
+        }
+        await interaction.reply({ content: 'ターミナル1', components: components});
+        buttonMap = Object.fromEntries(
+            deviceCustomIds.map((item, index) => [item, deviceRoute.flat()[index]])
+        );
+        console.log(buttonMap)
+    }
+    if(interaction.commandName === "terminal"){
+        const deviceRoute = [
+            {"t00":-1}, {"t01":-1}, {"t02":-1}, {"t03":-1}, {"t04":-1},
+            {"t10":-1}, {"t11":1}, {"t12":2}, {"t13":3}, {"t14":-1},
+            {"t20":-1}, {"t21":1}, {"t22":-1}, {"t23":1}, {"t24":-1},
+            {"t30":-1}, {"t31":-1}, {"t32":-1}, {"t33":-1}, {"t34":-1},
+            {"t40":1}, {"t41":1}, {"t42":-1}, {"t43":3}, {"t44":1},
+        ]
     }
 });
 
@@ -75,8 +90,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isButton()) return;
 
-    if (customids.includes(interaction.customId)) {
-        await interaction.reply({ content: `${interaction.user.username} さん、ボタンがクリックされました！`, ephemeral: true });
+    if (interaction.customId in buttonMap) {
+        await interaction.reply({ content: `${buttonMap[interaction.customId]}`, ephemeral: true });
     }
 });
 
