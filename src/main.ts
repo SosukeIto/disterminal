@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, Events } from 'discord.js';
+import { Client, GatewayIntentBits, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, Events, ButtonStyle } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import 'dotenv/config';
@@ -21,6 +21,9 @@ const commands = [
         .setDescription('ボタンを表示します。'),
     new SlashCommandBuilder()
         .setName('device')
+        .setDescription('デバイス起動'),
+    new SlashCommandBuilder()
+        .setName('terminal')
         .setDescription('デバイス起動')
 ].map(command => command.toJSON());
 
@@ -76,13 +79,31 @@ client.on(Events.InteractionCreate, async (interaction) => {
         console.log(buttonMap)
     }
     if(interaction.commandName === "terminal"){
-        const deviceRoute = [
-            {"t00":-1}, {"t01":-1}, {"t02":-1}, {"t03":-1}, {"t04":-1},
+        const deviceRoute: Record<string, number>[]= [
+            {"t00":1}, {"t01":2}, {"t02":3}, {"t03":4}, {"t04":5},
             {"t10":-1}, {"t11":1}, {"t12":2}, {"t13":3}, {"t14":-1},
             {"t20":-1}, {"t21":1}, {"t22":-1}, {"t23":1}, {"t24":-1},
             {"t30":-1}, {"t31":-1}, {"t32":-1}, {"t33":-1}, {"t34":-1},
             {"t40":1}, {"t41":1}, {"t42":-1}, {"t43":3}, {"t44":1},
         ]
+        const buttons: ButtonBuilder[] = []
+        const components: ActionRowBuilder<ButtonBuilder>[]= []
+        for(let i = 0; i < deviceRoute.length; i++){
+            if (i % 5 === 0 && i != 0){
+                const row: ActionRowBuilder<ButtonBuilder>= new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
+                components.push(row)
+                buttons.length = 0
+            }   
+            const route = deviceRoute[i]
+            const routeNumber: string = Object.keys(route)[0];
+            console.log(route[routeNumber])
+            const button: ButtonBuilder = new ButtonBuilder()
+                .setCustomId(routeNumber)
+                .setLabel(route[routeNumber].toString())
+                .setStyle(ButtonStyle.Primary) 
+            buttons.push(button)       
+        }
+        await interaction.reply({ content: 'ターミナル1', components: components});
     }
 });
 

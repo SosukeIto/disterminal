@@ -31,6 +31,9 @@ const commands = [
         .setDescription('ボタンを表示します。'),
     new discord_js_1.SlashCommandBuilder()
         .setName('device')
+        .setDescription('デバイス起動'),
+    new discord_js_1.SlashCommandBuilder()
+        .setName('terminal')
         .setDescription('デバイス起動')
 ].map(command => command.toJSON());
 const rest = new rest_1.REST({ version: '10' }).setToken(TOKEN);
@@ -80,6 +83,33 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
         yield interaction.reply({ content: 'ターミナル1', components: components });
         buttonMap = Object.fromEntries(deviceCustomIds.map((item, index) => [item, deviceRoute.flat()[index]]));
         console.log(buttonMap);
+    }
+    if (interaction.commandName === "terminal") {
+        const deviceRoute = [
+            { "t00": 1 }, { "t01": 2 }, { "t02": 3 }, { "t03": 4 }, { "t04": 5 },
+            { "t10": -1 }, { "t11": 1 }, { "t12": 2 }, { "t13": 3 }, { "t14": -1 },
+            { "t20": -1 }, { "t21": 1 }, { "t22": -1 }, { "t23": 1 }, { "t24": -1 },
+            { "t30": -1 }, { "t31": -1 }, { "t32": -1 }, { "t33": -1 }, { "t34": -1 },
+            { "t40": 1 }, { "t41": 1 }, { "t42": -1 }, { "t43": 3 }, { "t44": 1 },
+        ];
+        const buttons = [];
+        const components = [];
+        for (let i = 0; i < deviceRoute.length; i++) {
+            if (i % 5 === 0 && i != 0) {
+                const row = new discord_js_1.ActionRowBuilder().addComponents(buttons);
+                components.push(row);
+                buttons.length = 0;
+            }
+            const route = deviceRoute[i];
+            const routeNumber = Object.keys(route)[0];
+            console.log(route[routeNumber]);
+            const button = new discord_js_1.ButtonBuilder()
+                .setCustomId(routeNumber)
+                .setLabel(route[routeNumber].toString())
+                .setStyle(discord_js_1.ButtonStyle.Primary);
+            buttons.push(button);
+        }
+        yield interaction.reply({ content: 'ターミナル1', components: components });
     }
 }));
 // ボタンクリック時の処理
