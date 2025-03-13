@@ -13,6 +13,13 @@ const GUILD_ID: string = process.env.GUILD_ID!;
 let customIds: string[] = []
 let deviceCustomIds: string[] = [];
 let deviceButtons: ButtonBuilder[] = [];
+const terminalRoute: Record<string, number>[]= [
+    {"t00":1}, {"t01":2}, {"t02":3}, {"t03":4}, {"t04":5},
+    {"t10":-1}, {"t11":1}, {"t12":2}, {"t13":3}, {"t14":-1},
+    {"t20":-1}, {"t21":1}, {"t22":-1}, {"t23":1}, {"t24":-1},
+    {"t30":-1}, {"t31":-1}, {"t32":-1}, {"t33":-1}, {"t34":-1},
+    {"t40":1}, {"t41":1}, {"t42":-1}, {"t43":3}, {"t44":1},
+]
 let buttonMap: Record<string, number>;
 // スラッシュコマンドの登録
 const commands = [
@@ -79,24 +86,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
         console.log(buttonMap)
     }
     if(interaction.commandName === "terminal"){
-        const deviceRoute: Record<string, number>[]= [
-            {"t00":1}, {"t01":2}, {"t02":3}, {"t03":4}, {"t04":5},
-            {"t10":-1}, {"t11":1}, {"t12":2}, {"t13":3}, {"t14":-1},
-            {"t20":-1}, {"t21":1}, {"t22":-1}, {"t23":1}, {"t24":-1},
-            {"t30":-1}, {"t31":-1}, {"t32":-1}, {"t33":-1}, {"t34":-1},
-            {"t40":1}, {"t41":1}, {"t42":-1}, {"t43":3}, {"t44":1},
-        ]
         const buttons: ButtonBuilder[] = []
         const components: ActionRowBuilder<ButtonBuilder>[]= []
-        for(let i = 0; i < deviceRoute.length; i++){
+        for(let i = 0; i < terminalRoute.length; i++){
             if (i % 5 === 0 && i != 0){
                 const row: ActionRowBuilder<ButtonBuilder>= new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
                 components.push(row)
                 buttons.length = 0
             }   
-            const route = deviceRoute[i]
+            const route = terminalRoute[i]
             const routeNumber: string = Object.keys(route)[0];
-            console.log(route[routeNumber])
             const button: ButtonBuilder = new ButtonBuilder()
                 .setCustomId(routeNumber)
                 .setLabel(route[routeNumber].toString())
@@ -110,9 +109,35 @@ client.on(Events.InteractionCreate, async (interaction) => {
 // ボタンクリック時の処理
 client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isButton()) return;
-
+/*
     if (interaction.customId in buttonMap) {
         await interaction.reply({ content: `${buttonMap[interaction.customId]}`, ephemeral: true });
+    }
+*/
+    await interaction.deferUpdate(); 
+    for(let i = 0; i < terminalRoute.length; i++){
+        if(Object.keys(terminalRoute[i])[0] === interaction.customId){
+            console.log(terminalRoute[i][interaction.customId])
+            terminalRoute[i][interaction.customId]--;
+            console.log(terminalRoute[i][interaction.customId])
+            const buttons: ButtonBuilder[] = []
+            const components: ActionRowBuilder<ButtonBuilder>[]= []
+            for(let i = 0; i < terminalRoute.length; i++){
+                if (i % 5 === 0 && i != 0){
+                    const row: ActionRowBuilder<ButtonBuilder>= new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
+                    components.push(row)
+                    buttons.length = 0
+                }   
+                const route = terminalRoute[i]
+                const routeNumber: string = Object.keys(route)[0];
+                const button: ButtonBuilder = new ButtonBuilder()
+                    .setCustomId(routeNumber)
+                    .setLabel(route[routeNumber].toString())
+                    .setStyle(ButtonStyle.Primary) 
+                buttons.push(button)       
+            }
+            await interaction.editReply({ content: 'ターミナル1', components: components});
+        }
     }
 });
 

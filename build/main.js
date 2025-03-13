@@ -23,6 +23,13 @@ const GUILD_ID = process.env.GUILD_ID;
 let customIds = [];
 let deviceCustomIds = [];
 let deviceButtons = [];
+const terminalRoute = [
+    { "t00": 1 }, { "t01": 2 }, { "t02": 3 }, { "t03": 4 }, { "t04": 5 },
+    { "t10": -1 }, { "t11": 1 }, { "t12": 2 }, { "t13": 3 }, { "t14": -1 },
+    { "t20": -1 }, { "t21": 1 }, { "t22": -1 }, { "t23": 1 }, { "t24": -1 },
+    { "t30": -1 }, { "t31": -1 }, { "t32": -1 }, { "t33": -1 }, { "t34": -1 },
+    { "t40": 1 }, { "t41": 1 }, { "t42": -1 }, { "t43": 3 }, { "t44": 1 },
+];
 let buttonMap;
 // スラッシュコマンドの登録
 const commands = [
@@ -85,24 +92,16 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
         console.log(buttonMap);
     }
     if (interaction.commandName === "terminal") {
-        const deviceRoute = [
-            { "t00": 1 }, { "t01": 2 }, { "t02": 3 }, { "t03": 4 }, { "t04": 5 },
-            { "t10": -1 }, { "t11": 1 }, { "t12": 2 }, { "t13": 3 }, { "t14": -1 },
-            { "t20": -1 }, { "t21": 1 }, { "t22": -1 }, { "t23": 1 }, { "t24": -1 },
-            { "t30": -1 }, { "t31": -1 }, { "t32": -1 }, { "t33": -1 }, { "t34": -1 },
-            { "t40": 1 }, { "t41": 1 }, { "t42": -1 }, { "t43": 3 }, { "t44": 1 },
-        ];
         const buttons = [];
         const components = [];
-        for (let i = 0; i < deviceRoute.length; i++) {
+        for (let i = 0; i < terminalRoute.length; i++) {
             if (i % 5 === 0 && i != 0) {
                 const row = new discord_js_1.ActionRowBuilder().addComponents(buttons);
                 components.push(row);
                 buttons.length = 0;
             }
-            const route = deviceRoute[i];
+            const route = terminalRoute[i];
             const routeNumber = Object.keys(route)[0];
-            console.log(route[routeNumber]);
             const button = new discord_js_1.ButtonBuilder()
                 .setCustomId(routeNumber)
                 .setLabel(route[routeNumber].toString())
@@ -116,8 +115,35 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
 client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void 0, void 0, void 0, function* () {
     if (!interaction.isButton())
         return;
-    if (interaction.customId in buttonMap) {
-        yield interaction.reply({ content: `${buttonMap[interaction.customId]}`, ephemeral: true });
+    /*
+        if (interaction.customId in buttonMap) {
+            await interaction.reply({ content: `${buttonMap[interaction.customId]}`, ephemeral: true });
+        }
+    */
+    yield interaction.deferUpdate();
+    for (let i = 0; i < terminalRoute.length; i++) {
+        if (Object.keys(terminalRoute[i])[0] === interaction.customId) {
+            console.log(terminalRoute[i][interaction.customId]);
+            terminalRoute[i][interaction.customId]--;
+            console.log(terminalRoute[i][interaction.customId]);
+            const buttons = [];
+            const components = [];
+            for (let i = 0; i < terminalRoute.length; i++) {
+                if (i % 5 === 0 && i != 0) {
+                    const row = new discord_js_1.ActionRowBuilder().addComponents(buttons);
+                    components.push(row);
+                    buttons.length = 0;
+                }
+                const route = terminalRoute[i];
+                const routeNumber = Object.keys(route)[0];
+                const button = new discord_js_1.ButtonBuilder()
+                    .setCustomId(routeNumber)
+                    .setLabel(route[routeNumber].toString())
+                    .setStyle(discord_js_1.ButtonStyle.Primary);
+                buttons.push(button);
+            }
+            yield interaction.editReply({ content: 'ターミナル1', components: components });
+        }
     }
 }));
 // Bot のログイン
