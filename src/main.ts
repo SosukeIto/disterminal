@@ -6,7 +6,7 @@ import { generateButton } from './modules/generateButton';
 import { generateDevice } from './modules/generateDevice';
 import { generateComponents } from './modules/generateComponents'
 import { generateMatchColorsComponents } from './modules/generateMatchColorsComponents';
-
+import { generateChargeEnergy } from './modules/generateChargeEnergy';
 const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const TOKEN: string = process.env.DISCORD_TOKEN!;
 const CLIENT_ID: string = process.env.CLIENT_ID!;
@@ -113,7 +113,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         await interaction.reply({ content: '色を揃えろ！', components: components});
     }
     if(interaction.commandName === "charge-energy"){
-        const components: ActionRowBuilder<ButtonBuilder>[] = generateMatchColorsComponents(panelMatchColors);
+        const components: ActionRowBuilder<ButtonBuilder>[] = generateChargeEnergy(panelChargeEnergy);
         await interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components});
     }
 });
@@ -139,6 +139,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
             panelMatchColors[i][interaction.customId]--;
         const components: ActionRowBuilder<ButtonBuilder>[] = generateMatchColorsComponents(panelMatchColors);
         await interaction.editReply({ content: '色を揃えろ！', components: components});
+        }
+    }
+    for(let i = 0; i < panelChargeEnergy.length; i++){
+        if(Object.keys(panelChargeEnergy[i])[0] === interaction.customId){
+            panelChargeEnergy[i][interaction.customId]--;
+        const components: ActionRowBuilder<ButtonBuilder>[] = generateChargeEnergy(panelChargeEnergy);
+        await interaction.editReply({ content: 'バッテリーから電気を供給するんだ！', components: components});
         }
     }
 });

@@ -18,11 +18,12 @@ export function generateMatchColorsComponents(panel: Record<string, number>[]): 
     for (let i = 0; i < panel.length; i++) {
         const route = panel[i];
         const routeNumber: string = Object.keys(route)[0];
+        const isDisabled: boolean  = route[routeNumber] <= 0? true: false;
         const button: ButtonBuilder = new ButtonBuilder()
             .setCustomId(routeNumber)
             .setLabel(route[routeNumber].toString())
-            .setStyle(changeColor(route[routeNumber]));
-
+            .setStyle(changeColor(route[routeNumber]))
+            .setDisabled(isDisabled)
         buttons.push(button);
         if ((i + 1) % 3 === 0) {
             components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(...buttons));
