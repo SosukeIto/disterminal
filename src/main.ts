@@ -4,6 +4,7 @@ import { Routes } from 'discord-api-types/v10';
 import 'dotenv/config';
 import { generateButton } from './modules/generateButton';
 import { generateDevice } from './modules/generateDevice';
+import { generateComponents } from './modules/generateComponents'
 // Discord Bot の設定
 const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -86,22 +87,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         console.log(buttonMap)
     }
     if(interaction.commandName === "terminal"){
-        const buttons: ButtonBuilder[] = []
-        const components: ActionRowBuilder<ButtonBuilder>[]= []
-        for(let i = 0; i < terminalRoute.length; i++){
-            if (i % 5 === 0 && i != 0){
-                const row: ActionRowBuilder<ButtonBuilder>= new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
-                components.push(row)
-                buttons.length = 0
-            }   
-            const route = terminalRoute[i]
-            const routeNumber: string = Object.keys(route)[0];
-            const button: ButtonBuilder = new ButtonBuilder()
-                .setCustomId(routeNumber)
-                .setLabel(route[routeNumber].toString())
-                .setStyle(ButtonStyle.Primary) 
-            buttons.push(button)       
-        }
+        const components: ActionRowBuilder<ButtonBuilder>[] = generateComponents(terminalRoute)
         await interaction.reply({ content: 'ターミナル1', components: components});
     }
 });
@@ -117,25 +103,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await interaction.deferUpdate(); 
     for(let i = 0; i < terminalRoute.length; i++){
         if(Object.keys(terminalRoute[i])[0] === interaction.customId){
-            console.log(terminalRoute[i][interaction.customId])
             terminalRoute[i][interaction.customId]--;
-            console.log(terminalRoute[i][interaction.customId])
-            const buttons: ButtonBuilder[] = []
-            const components: ActionRowBuilder<ButtonBuilder>[]= []
-            for(let i = 0; i < terminalRoute.length; i++){
-                if (i % 5 === 0 && i != 0){
-                    const row: ActionRowBuilder<ButtonBuilder>= new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
-                    components.push(row)
-                    buttons.length = 0
-                }   
-                const route = terminalRoute[i]
-                const routeNumber: string = Object.keys(route)[0];
-                const button: ButtonBuilder = new ButtonBuilder()
-                    .setCustomId(routeNumber)
-                    .setLabel(route[routeNumber].toString())
-                    .setStyle(ButtonStyle.Primary) 
-                buttons.push(button)       
-            }
+            const components: ActionRowBuilder<ButtonBuilder>[] = generateComponents(terminalRoute);
             await interaction.editReply({ content: 'ターミナル1', components: components});
         }
     }

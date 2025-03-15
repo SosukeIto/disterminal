@@ -15,6 +15,7 @@ const v10_1 = require("discord-api-types/v10");
 require("dotenv/config");
 const generateButton_1 = require("./modules/generateButton");
 const generateDevice_1 = require("./modules/generateDevice");
+const generateComponents_1 = require("./modules/generateComponents");
 // Discord Bot の設定
 const client = new discord_js_1.Client({ intents: [discord_js_1.GatewayIntentBits.Guilds] });
 const TOKEN = process.env.DISCORD_TOKEN;
@@ -92,22 +93,7 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
         console.log(buttonMap);
     }
     if (interaction.commandName === "terminal") {
-        const buttons = [];
-        const components = [];
-        for (let i = 0; i < terminalRoute.length; i++) {
-            if (i % 5 === 0 && i != 0) {
-                const row = new discord_js_1.ActionRowBuilder().addComponents(buttons);
-                components.push(row);
-                buttons.length = 0;
-            }
-            const route = terminalRoute[i];
-            const routeNumber = Object.keys(route)[0];
-            const button = new discord_js_1.ButtonBuilder()
-                .setCustomId(routeNumber)
-                .setLabel(route[routeNumber].toString())
-                .setStyle(discord_js_1.ButtonStyle.Primary);
-            buttons.push(button);
-        }
+        const components = (0, generateComponents_1.generateComponents)(terminalRoute);
         yield interaction.reply({ content: 'ターミナル1', components: components });
     }
 }));
@@ -123,25 +109,8 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
     yield interaction.deferUpdate();
     for (let i = 0; i < terminalRoute.length; i++) {
         if (Object.keys(terminalRoute[i])[0] === interaction.customId) {
-            console.log(terminalRoute[i][interaction.customId]);
             terminalRoute[i][interaction.customId]--;
-            console.log(terminalRoute[i][interaction.customId]);
-            const buttons = [];
-            const components = [];
-            for (let i = 0; i < terminalRoute.length; i++) {
-                if (i % 5 === 0 && i != 0) {
-                    const row = new discord_js_1.ActionRowBuilder().addComponents(buttons);
-                    components.push(row);
-                    buttons.length = 0;
-                }
-                const route = terminalRoute[i];
-                const routeNumber = Object.keys(route)[0];
-                const button = new discord_js_1.ButtonBuilder()
-                    .setCustomId(routeNumber)
-                    .setLabel(route[routeNumber].toString())
-                    .setStyle(discord_js_1.ButtonStyle.Primary);
-                buttons.push(button);
-            }
+            const components = (0, generateComponents_1.generateComponents)(terminalRoute);
             yield interaction.editReply({ content: 'ターミナル1', components: components });
         }
     }
