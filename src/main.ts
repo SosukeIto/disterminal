@@ -9,13 +9,6 @@ const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const TOKEN: string = process.env.DISCORD_TOKEN!;
 const CLIENT_ID: string = process.env.CLIENT_ID!;
 const GUILD_ID: string = process.env.GUILD_ID!;
-const terminalRoute: Record<string, number>[]= [
-    {"t00":1}, {"t01":2}, {"t02":3}, {"t03":4}, {"t04":5},
-    {"t10":5}, {"t11":1}, {"t12":2}, {"t13":3}, {"t14":4},
-    {"t20":4}, {"t21":5}, {"t22":1}, {"t23":2}, {"t24":3},
-    {"t30":3}, {"t31":4}, {"t32":5}, {"t33":1}, {"t34":2},
-    {"t40":2}, {"t41":3}, {"t42":4}, {"t43":5}, {"t44":1},
-];
 const panelMatchColors: Record<string, number>[]= [
     {"m00":1}, {"m01":2}, {"m02":3}, 
     {"m10":3}, {"m11":1}, {"m12":2}, 
