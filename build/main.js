@@ -100,6 +100,12 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
         if (Object.keys(panelChargeEnergy[i])[0] === interaction.customId) {
             panelChargeEnergy[i][interaction.customId]--;
             const components = (0, generateChargeEnergy_1.generateChargeEnergy)(panelChargeEnergy);
+            const numbers = panelChargeEnergy.flatMap(obj => Object.values(obj)).every(value => value === 0);
+            if (numbers) {
+                isCharged = true;
+                yield interaction.editReply({ content: '電力供給完了！', components: components });
+                break;
+            }
             yield interaction.editReply({ content: 'バッテリーから電気を供給するんだ！', components: components });
         }
     }

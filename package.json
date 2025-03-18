@@ -10,7 +10,8 @@
   "scripts": {
   "test": "ts-node src/main.ts",
 	"start": "node build/main.js",
-	"compile": "tsc -p ."
+	"compile": "tsc -p .",
+  "dev": "npm run compile && npm run start"
   },
   "repository": {
     "type": "git",
