@@ -68,9 +68,8 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
     }
     if (interaction.commandName === "charge-energy") {
         const components = (0, generateChargeEnergy_1.generateChargeEnergy)(panelChargeEnergy);
-        yield interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components });
         isCharged = false;
-        yield interaction.reply({ content: '色を揃えろ！', components: components });
+        yield interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components });
         setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
             if (!isCharged) {
                 yield interaction.followUp({ content: "時間切れ！失敗した..." });
@@ -100,7 +99,7 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
         if (Object.keys(panelChargeEnergy[i])[0] === interaction.customId) {
             panelChargeEnergy[i][interaction.customId]--;
             const components = (0, generateChargeEnergy_1.generateChargeEnergy)(panelChargeEnergy);
-            const numbers = panelChargeEnergy.flatMap(obj => Object.values(obj)).every(value => value === 0);
+            const numbers = panelChargeEnergy.flatMap(obj => Object.values(obj)).every(value => value === 0 || value === -1 || value === -2 || value === -3);
             if (numbers) {
                 isCharged = true;
                 yield interaction.editReply({ content: '電力供給完了！', components: components });

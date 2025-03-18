@@ -59,9 +59,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
     if(interaction.commandName === "charge-energy"){
         const components: ActionRowBuilder<ButtonBuilder>[] = generateChargeEnergy(panelChargeEnergy);
-        await interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components});
         isCharged = false
-        await interaction.reply({ content: '色を揃えろ！', components: components});
+        await interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components});
         setTimeout(async () => {
             if (!isCharged) {
                 await interaction.followUp({ content: "時間切れ！失敗した..." });
@@ -93,7 +92,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         if(Object.keys(panelChargeEnergy[i])[0] === interaction.customId){
             panelChargeEnergy[i][interaction.customId]--;
         const components: ActionRowBuilder<ButtonBuilder>[] = generateChargeEnergy(panelChargeEnergy);
-        const numbers = panelChargeEnergy.flatMap(obj => Object.values(obj)).every(value => value === 0);
+        const numbers = panelChargeEnergy.flatMap(obj => Object.values(obj)).every(value => value === 0 || value === -1 || value === -2 || value === -3);
         if (numbers){
             isCharged = true;
             await interaction.editReply({ content: '電力供給完了！', components: components});
