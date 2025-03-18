@@ -32,7 +32,8 @@ const commands = [
 ].map(command => command.toJSON());
 
 const rest: REST = new REST({ version: '10' }).setToken(TOKEN);
-
+let isMatched: boolean = true;
+let isCharged: boolean = true;
 (async () => {
     try {
         console.log('スラッシュコマンドを登録中...');
@@ -48,12 +49,26 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
     if(interaction.commandName === "match-colors"){
         const components: ActionRowBuilder<ButtonBuilder>[] = generateMatchColorsComponents(panelMatchColors);
+        isMatched = false;
         await interaction.reply({ content: '色を揃えろ！', components: components});
+        setTimeout(async () => {
+            if (!isMatched) {
+                await interaction.followUp({ content: "時間切れ！失敗した..." });
+            }
+        }, 30000);
     }
     if(interaction.commandName === "charge-energy"){
         const components: ActionRowBuilder<ButtonBuilder>[] = generateChargeEnergy(panelChargeEnergy);
         await interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components});
+        isCharged = false
+        await interaction.reply({ content: '色を揃えろ！', components: components});
+        setTimeout(async () => {
+            if (!isCharged) {
+                await interaction.followUp({ content: "時間切れ！失敗した..." });
+            }
+        }, 30000);
     }
+    
 });
 
 // ボタンクリック時の処理
@@ -64,7 +79,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
     for(let i = 0; i < panelMatchColors.length; i++){
         if(Object.keys(panelMatchColors[i])[0] === interaction.customId){
             panelMatchColors[i][interaction.customId]--;
-        const components: ActionRowBuilder<ButtonBuilder>[] = generateMatchColorsComponents(panelMatchColors);
+            const numbers = panelMatchColors.flatMap(obj => Object.values(obj)).every(value => value === 0);
+            const components: ActionRowBuilder<ButtonBuilder>[] = generateMatchColorsComponents(panelMatchColors);
+            if (numbers){
+                isMatched = true;
+                await interaction.editReply({ content: '全て揃えられました！', components: components});
+                break
+            }
         await interaction.editReply({ content: '色を揃えろ！', components: components});
         }
     }
@@ -72,6 +93,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
         if(Object.keys(panelChargeEnergy[i])[0] === interaction.customId){
             panelChargeEnergy[i][interaction.customId]--;
         const components: ActionRowBuilder<ButtonBuilder>[] = generateChargeEnergy(panelChargeEnergy);
+        const numbers = panelChargeEnergy.flatMap(obj => Object.values(obj)).every(value => value === 0);
+        if (numbers){
+            isCharged = true;
+            await interaction.editReply({ content: '電力供給完了！', components: components});
+            break
+        }
         await interaction.editReply({ content: 'バッテリーから電気を供給するんだ！', components: components});
         }
     }

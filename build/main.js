@@ -19,13 +19,6 @@ const client = new discord_js_1.Client({ intents: [discord_js_1.GatewayIntentBit
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 const GUILD_ID = process.env.GUILD_ID;
-const terminalRoute = [
-    { "t00": 1 }, { "t01": 2 }, { "t02": 3 }, { "t03": 4 }, { "t04": 5 },
-    { "t10": 5 }, { "t11": 1 }, { "t12": 2 }, { "t13": 3 }, { "t14": 4 },
-    { "t20": 4 }, { "t21": 5 }, { "t22": 1 }, { "t23": 2 }, { "t24": 3 },
-    { "t30": 3 }, { "t31": 4 }, { "t32": 5 }, { "t33": 1 }, { "t34": 2 },
-    { "t40": 2 }, { "t41": 3 }, { "t42": 4 }, { "t43": 5 }, { "t44": 1 },
-];
 const panelMatchColors = [
     { "m00": 1 }, { "m01": 2 }, { "m02": 3 },
     { "m10": 3 }, { "m11": 1 }, { "m12": 2 },
@@ -47,6 +40,8 @@ const commands = [
         .setDescription('バッテリーから電気を供給するんだ！')
 ].map(command => command.toJSON());
 const rest = new rest_1.REST({ version: '10' }).setToken(TOKEN);
+let isMatched = true;
+let isCharged = true;
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log('スラッシュコマンドを登録中...');
@@ -63,11 +58,24 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
         return;
     if (interaction.commandName === "match-colors") {
         const components = (0, generateMatchColorsComponents_1.generateMatchColorsComponents)(panelMatchColors);
+        isMatched = false;
         yield interaction.reply({ content: '色を揃えろ！', components: components });
+        setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
+            if (!isMatched) {
+                yield interaction.followUp({ content: "時間切れ！失敗した..." });
+            }
+        }), 30000);
     }
     if (interaction.commandName === "charge-energy") {
         const components = (0, generateChargeEnergy_1.generateChargeEnergy)(panelChargeEnergy);
         yield interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components });
+        isCharged = false;
+        yield interaction.reply({ content: '色を揃えろ！', components: components });
+        setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
+            if (!isCharged) {
+                yield interaction.followUp({ content: "時間切れ！失敗した..." });
+            }
+        }), 30000);
     }
 }));
 // ボタンクリック時の処理
@@ -78,7 +86,13 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
     for (let i = 0; i < panelMatchColors.length; i++) {
         if (Object.keys(panelMatchColors[i])[0] === interaction.customId) {
             panelMatchColors[i][interaction.customId]--;
+            const numbers = panelMatchColors.flatMap(obj => Object.values(obj)).every(value => value === 0);
             const components = (0, generateMatchColorsComponents_1.generateMatchColorsComponents)(panelMatchColors);
+            if (numbers) {
+                isMatched = true;
+                yield interaction.editReply({ content: '全て揃えられました！', components: components });
+                break;
+            }
             yield interaction.editReply({ content: '色を揃えろ！', components: components });
         }
     }
