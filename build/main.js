@@ -15,6 +15,7 @@ const v10_1 = require("discord-api-types/v10");
 require("dotenv/config");
 const generateMatchColorsComponents_1 = require("./modules/generateMatchColorsComponents");
 const generateChargeEnergy_1 = require("./modules/generateChargeEnergy");
+const generateTicTacToe_1 = require("./modules/generateTicTacToe");
 const client = new discord_js_1.Client({ intents: [discord_js_1.GatewayIntentBits.Guilds] });
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -25,11 +26,16 @@ const panelMatchColors = [
     { "m20": 2 }, { "m21": 3 }, { "m22": 1 }
 ];
 const panelChargeEnergy = [
-    { "t00": -1 }, { "t01": -1 }, { "t02": -1 }, { "t03": -1 }, { "t04": -1 },
-    { "t10": -1 }, { "t11": 1 }, { "t12": 2 }, { "t13": 3 }, { "t14": -1 },
-    { "t20": -1 }, { "t21": 2 }, { "t22": -1 }, { "t23": 1 }, { "t24": -1 },
-    { "t30": 3 }, { "t31": 1 }, { "t32": -1 }, { "t33": 2 }, { "t34": 1 },
-    { "t40": -2 }, { "t41": -1 }, { "t42": -1 }, { "t43": -1 }, { "t44": -3 },
+    { "ce00": -1 }, { "ce01": -1 }, { "ce02": -1 }, { "ce03": -1 }, { "ce04": -1 },
+    { "ce10": -1 }, { "ce11": 1 }, { "ce12": 2 }, { "ce13": 3 }, { "ce14": -1 },
+    { "ce20": -1 }, { "ce21": 2 }, { "ce22": -1 }, { "ce23": 1 }, { "ce24": -1 },
+    { "ce30": 3 }, { "ce31": 1 }, { "ce32": -1 }, { "ce33": 2 }, { "ce34": 1 },
+    { "ce40": -2 }, { "ce41": -1 }, { "ce42": -1 }, { "ce43": -1 }, { "ce44": -3 },
+];
+const panelTicTacToe = [
+    { "ttt00": -1 }, { "ttt01": -1 }, { "ttt02": -1 },
+    { "ttt10": -1 }, { "ttt11": -1 }, { "ttt12": -1 },
+    { "ttt20": -1 }, { "ttt21": -1 }, { "ttt22": -1 }
 ];
 const commands = [
     new discord_js_1.SlashCommandBuilder()
@@ -37,11 +43,15 @@ const commands = [
         .setDescription('色を揃えろ！'),
     new discord_js_1.SlashCommandBuilder()
         .setName('charge-energy')
-        .setDescription('バッテリーから電気を供給するんだ！')
+        .setDescription('バッテリーから電気を供給するんだ！'),
+    new discord_js_1.SlashCommandBuilder()
+        .setName('tic-tac-toe')
+        .setDescription('⭕️❌ゲーム')
 ].map(command => command.toJSON());
 const rest = new rest_1.REST({ version: '10' }).setToken(TOKEN);
 let isMatched = true;
 let isCharged = true;
+let isRetired = true;
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log('スラッシュコマンドを登録中...');
@@ -70,6 +80,16 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
         const components = (0, generateChargeEnergy_1.generateChargeEnergy)(panelChargeEnergy);
         isCharged = false;
         yield interaction.reply({ content: 'バッテリーから電気を供給するんだ！', components: components });
+        setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
+            if (!isCharged) {
+                yield interaction.followUp({ content: "時間切れ！失敗した..." });
+            }
+        }), 30000);
+    }
+    if (interaction.commandName === "tic-tac-toe") {
+        const components = (0, generateTicTacToe_1.generateTicTacToe)(panelTicTacToe);
+        isRetired = false;
+        yield interaction.reply({ content: 'プレイヤー：⭕️ 敵：❌', components: components });
         setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
             if (!isCharged) {
                 yield interaction.followUp({ content: "時間切れ！失敗した..." });
@@ -106,6 +126,19 @@ client.on(discord_js_1.Events.InteractionCreate, (interaction) => __awaiter(void
                 break;
             }
             yield interaction.editReply({ content: 'バッテリーから電気を供給するんだ！', components: components });
+        }
+    }
+    for (let i = 0; i < panelTicTacToe.length; i++) {
+        if (Object.keys(panelTicTacToe[i])[0] === interaction.customId) {
+            panelTicTacToe[i][interaction.customId] = 2;
+            const components = (0, generateTicTacToe_1.generateTicTacToe)(panelTicTacToe);
+            const numbers = panelTicTacToe.flatMap(obj => Object.values(obj)).every(value => value === 0 || value === -1 || value === -2 || value === -3);
+            if (numbers) {
+                isCharged = true;
+                yield interaction.editReply({ content: 'プレイヤー：⭕️ 敵：❌', components: components });
+                break;
+            }
+            yield interaction.editReply({ content: 'プレイヤー：⭕️ 敵：❌', components: components });
         }
     }
 }));
