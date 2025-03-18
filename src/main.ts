@@ -6,6 +6,7 @@ import { generateMatchColorsComponents } from './modules/generateMatchColorsComp
 import { generateChargeEnergy } from './modules/generateChargeEnergy';
 import { generateTicTacToe } from './modules/generateTicTacToe';
 import { generateRandomString } from './modules/generateRandomString';
+
 const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const TOKEN: string = process.env.DISCORD_TOKEN!;
 const CLIENT_ID: string = process.env.CLIENT_ID!;
@@ -52,6 +53,7 @@ let isRetired: boolean = true;
         console.error(error);
     }
 })();
+
 
 // コマンド実行時の処理
 client.on(Events.InteractionCreate, async (interaction) => {
